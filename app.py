@@ -1,37 +1,42 @@
-
 import streamlit as st
 import requests
 import json
 from extra_streamlit_components import CookieManager
 
+# إعدادات الصفحة
 st.set_page_config(page_title="استطلاع رأي مهني", layout="centered")
 
-# 1. إعداد مدير الكوكيز
+# مدير الكوكيز لمنع التكرار
 cookie_manager = CookieManager()
-
-# خطوة ضرورية لضمان تحميل الكوكيز
-st.write("") 
 
 st.title("استطلاع رأي حول الأداء والتعامل المهني")
 
-# 2. فحص إذا كان الشخص قد أرسل سابقاً
-# ملاحظة: الكوكيز قد تستغرق ثانية للتحميل
-has_submitted = cookie_manager.get("submitted_survey_v1")
+# فحص إذا كان الزميل قد أرسل رداً مسبقاً
+# ملاحظة: الكوكيز قد تحتاج لجزء من الثانية للتحميل عند فتح الصفحة
+submission_status = cookie_manager.get("survey_v2_status")
 
-if has_submitted == "true":
-    st.success("✅ شكرًا لك! لقد قمت بإرسال تقييمك مسبقاً.")
-    st.info("لضمان دقة الاستطلاع، يُسمح بإرسال الرد مرة واحدة فقط.")
+if submission_status == "submitted":
+    st.success("✅ شكرًا لك! لقد قمت بإرسال تقييمك مسبقًا.")
+    st.info("لضمان دقة النتائج، يُسمح بإرسال الرد مرة واحدة فقط لكل جهاز.")
     st.balloons()
 else:
-    st.info("عزيزي الزميل/ة، يهدف هذا الاستطلاع إلى التطوير الذاتي. الردود سرية تماماً.")
+    st.markdown("""
+    ### مادة توضيحية:
+    عزيزي الزميل/ة، تحية طيبة وبعد،
+    يهدف هذا الاستطلاع إلى قياس مدى رضاكم عن أسلوبي في العمل وكفاءتي المهنية وطريقة تعاملي الشخصية معكم. 
+    أؤكد لكم أن هذا الاستبيان **سري تماماً** ولا يتم فيه جمع أي بيانات شخصية، والنتائج ستُستخدم فقط لأغراض التحسين والتطوير ولن تُستخدم في أي خلافات.
+    شكراً لوقتكم وصراحتكم التي أقدرها عالياً.
+    <hr>
+    """, unsafe_allow_html=True)
 
+    # الرابط الخاص بك (Web App URL) من Google Apps Script
     script_url = "https://script.google.com/macros/s/AKfycbyfV8qjxaEKSwbOc4xfEPoBYCWaq5wwQB2MgbyZjq3fq7ptzqAdTxtX1JVE62J0g9WS/exec"
 
     with st.form(key="survey_form"):
-        work_style = st.select_slider("1. تقييم أسلوبي في العمل وتنسيق المهام:", options=[1, 2, 3, 4, 5], value=3)
-        efficiency = st.select_slider("2. تقييم كفاءتي المهنية وسرعة الإنجاز:", options=[1, 2, 3, 4, 5], value=3)
-        interaction = st.select_slider("3. تقييم المعاملة الشخصية والتواصل الإنساني:", options=[1, 2, 3, 4, 5], value=3)
-        notes = st.text_area("ملاحظات إضافية (اختياري):")
+        work_style = st.select_slider("1. أسلوبي العام في العمل وتنسيق المهام:", options=[1, 2, 3, 4, 5], value=3)
+        efficiency = st.select_slider("2. كفاءتي المهنية وقدرتي على إنجاز العمل:", options=[1, 2, 3, 4, 5], value=3)
+        interaction = st.select_slider("3. المعاملة الشخصية والتواصل الإنساني معكم:", options=[1, 2, 3, 4, 5], value=3)
+        notes = st.text_area("ملاحظات إضافية أو نصائح للتطوير (اختياري):")
         
         submit_button = st.form_submit_button(label="إرسال التقييم")
 
@@ -43,20 +48,24 @@ else:
             "notes": notes
         }
         
-        # تنفيذ الإرسال خارج الـ Form لضمان الاستقرار
-        success_flag = False
         try:
+            # محاولة إرسال البيانات
             response = requests.post(script_url, data=json.dumps(payload))
+            
+            # إذا نجح الإرسال
             if response.status_code == 200:
-                success_flag = True
-        except Exception as e:
-            st.error(f"حدث خطأ في الاتصال: {e}")
+                # زرع بصمة في المتصفح لمنع التكرار مستقبلاً
+                cookie_manager.set("survey_v2_status", "submitted", key="cookie_tracker")
+                st.success("تم إرسال تقييمك بنجاح! شكراً لك.")
+                st.balloons()
+                # إعادة تحميل الصفحة لتفعيل المنع وإخفاء النموذج
+                st.rerun()
+            else:
+                st.error("فشل الإرسال، يرجى التأكد من إعدادات الوصول في جوجل شيت.")
 
-        if success_flag:
-            # 3. حفظ الكوكي في المتصفح
-            cookie_manager.set("submitted_survey_v1", "true", key="unique_set_cookie")
-            st.success("تم إرسال تقييمك بنجاح! شكراً لك.")
-            st.balloons()
-            # التوقف قليلاً ثم إعادة التشغيل لتثبيت الحالة
-            st.info("سيتم تحديث الصفحة خلال لحظات...")
-            st.rerun()
+        except Exception as e:
+            # استثناء خاص بـ Streamlit لتفادي رسالة الخطأ الوهمية
+            if "RerunException" in str(type(e)):
+                raise e
+            else:
+                st.error("حدث خطأ تقني، يرجى المحاولة مرة أخرى.")
