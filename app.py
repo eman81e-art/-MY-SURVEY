@@ -22,7 +22,7 @@ user_id = get_user_unique_id()
 if "submitted" not in st.session_state:
     st.session_state.submitted = False
 
-st.title("استطلاع رأي حول الأداء والتعامل المهني")
+st.title("استطلاع رأي حول الأداء والتعامل المهني (زميلكم طارق البلاسمه (")
 
 if st.session_state.submitted:
     st.success(f"✅ شكراً لك! تم استلام تقييمك بنجاح.")
@@ -32,7 +32,7 @@ if st.session_state.submitted:
 # --- واجهة الاستبيان ---
 st.markdown(f"""
 عزيزي الزميل/ة، هذا الاستطلاع **سري تماماً**. 
-تم تحديد معرف رقمي لجهازك لضمان دقة البيانات وحذف المكرر: `{user_id}`
+لغايات التقيم الذاتي وتحسين الاداء: `{user_id}`
 <hr>
 """, unsafe_allow_html=True)
 
