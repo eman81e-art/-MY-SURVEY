@@ -21,11 +21,29 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- إدارة رمز عشوائي غير مرتبط بأي هوية، لمنع التكرار فقط ---
-cookie_manager = stx.CookieManager()
-respondent_token = cookie_manager.get(cookie="survey_token")
-if respondent_token is None:
-    respondent_token = str(uuid.uuid4())
-    cookie_manager.set("survey_token", respondent_token)
+cookie_manager = stx.CookieManager(key="cookie_manager")
+
+if "cookie_checked" not in st.session_state:
+    st.session_state.cookie_checked = False
+    st.session_state.survey_token = None
+
+if not st.session_state.cookie_checked:
+    existing_token = cookie_manager.get(cookie="survey_token")
+    st.session_state.cookie_checked = True
+    if existing_token is not None:
+        st.session_state.survey_token = existing_token
+    else:
+        # قد يكون هذا مجرد تأخر بمزامنة المكوّن مع المتصفح، لا "غياب فعلي" للكوكيز
+        # ننتظر دورة تحميل إضافية قبل الحسم بأنها زيارة جديدة فعلاً
+        st.session_state.cookie_checked = False
+        st.stop()
+
+if st.session_state.survey_token is None:
+    # بعد التأكد الفعلي من غياب الكوكيز، ننشئ رمزاً جديداً مرة واحدة فقط
+    st.session_state.survey_token = str(uuid.uuid4())
+    cookie_manager.set("survey_token", st.session_state.survey_token, key="set_token")
+
+respondent_token = st.session_state.survey_token
 
 if "submitted" not in st.session_state:
     st.session_state.submitted = False
@@ -72,4 +90,3 @@ if submit_button:
 
     st.session_state.submitted = True
     st.rerun()
-
