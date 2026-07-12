@@ -63,7 +63,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ضع الرابط الخاص بك هنا (تأكد أنه بين علامتي التنصيص "")
-script_url = "https://script.google.com/macros/s/AKfycbxLsDcgEpWtw0sPNTsLdjILT099ElJzeEoyP6PvANFnbVJtLiDBlrnz-6EFbKShpAuB/exec"
+script_url = "https://script.google.com/macros/s/AKfycbyfsflx-R7xMJ_91nmoo3rYKd4FZ2qfzIT-HSzyg7BH9hOpYl0Lyx80im5YvTteoM24/exec"
 
 with st.form(key="survey_form"):
     st.caption("مقياس التقييم: 1 = ضعيف  ←  →  5 = قوي")
