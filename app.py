@@ -70,6 +70,11 @@ with st.form(key="survey_form"):
     work_style = st.select_slider("1. أسلوبي العام في العمل وتنسيق المهام:", options=[1, 2, 3, 4, 5], value=3)
     efficiency = st.select_slider("2. كفاءتي المهنية وقدرتي على إنجاز العمل:", options=[1, 2, 3, 4, 5], value=3)
     interaction = st.select_slider("3. المعاملة الشخصية والتواصل الإنساني معكم:", options=[1, 2, 3, 4, 5], value=3)
+    leadership = st.select_slider("4. قدرتي على القيادة واتخاذ القرار:", options=[1, 2, 3, 4, 5], value=3)
+    communication = st.select_slider("5. وضوح تواصلي وتعليماتي بخصوص المهام:", options=[1, 2, 3, 4, 5], value=3)
+    fairness = st.select_slider("6. عدالتي وموضوعيتي بالتعامل مع أعضاء الفريق:", options=[1, 2, 3, 4, 5], value=3)
+    openness = st.select_slider("7. انفتاحي على أفكاركم ونقدكم البنّاء:", options=[1, 2, 3, 4, 5], value=3)
+    talent_dev = st.select_slider("8. دعمي لتطوير مهاراتكم ومواهبكم:", options=[1, 2, 3, 4, 5], value=3)
     notes = st.text_area("ملاحظات إضافية (اختياري):")
 
     submit_button = st.form_submit_button(label="إرسال التقييم")
@@ -79,6 +84,11 @@ if submit_button:
         "work_style": str(work_style),
         "efficiency": str(efficiency),
         "interaction": str(interaction),
+        "leadership": str(leadership),
+        "communication": str(communication),
+        "fairness": str(fairness),
+        "openness": str(openness),
+        "talent_dev": str(talent_dev),
         "notes": notes,
         "dedup_token": respondent_token,  # رمز عشوائي فقط لفلترة التكرار، لا يحمل أي هوية
     }
