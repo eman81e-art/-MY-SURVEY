@@ -26,29 +26,39 @@ st.markdown("""
 respondent_token = st.query_params.get("token")
 
 if not respondent_token:
+    st.title("استطلاع رأي حول الأداء والتعامل المهني (زميلكم طارق البلاسمة)")
+    st.write("اضغط الزر أدناه للمتابعة إلى الاستبيان:")
     components.html("""
+        <div style="text-align:center; padding:10px;">
+          <button id="startBtn" style="padding:14px 32px; font-size:16px; cursor:pointer;
+                   background-color:#2563eb; color:white; border:none; border-radius:8px;">
+            ابدأ الاستبيان
+          </button>
+        </div>
         <script>
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-            return null;
-        }
-        let token = getCookie('survey_token');
-        if (!token) {
-            token = crypto.randomUUID ? crypto.randomUUID() :
-                'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                    const r = Math.random() * 16 | 0;
-                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-                });
-            document.cookie = "survey_token=" + token + ";max-age=31536000;path=/";
-        }
-        const url = new URL(window.top.location.href);
-        url.searchParams.set('token', token);
-        window.top.location.replace(url.toString());
+        document.getElementById('startBtn').addEventListener('click', function() {
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+            let token = getCookie('survey_token');
+            if (!token) {
+                token = crypto.randomUUID ? crypto.randomUUID() :
+                    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0;
+                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                document.cookie = "survey_token=" + token + ";max-age=31536000;path=/";
+            }
+            const url = new URL(window.top.location.href);
+            url.searchParams.set('token', token);
+            window.top.location.href = url.toString();
+        });
         </script>
-    """, height=0)
+    """, height=90)
     st.stop()
 
 if "submitted" not in st.session_state:
