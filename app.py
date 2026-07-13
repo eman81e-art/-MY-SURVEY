@@ -6,7 +6,7 @@ import uuid
 # إعداد الصفحة
 st.set_page_config(page_title="استطلاع رأي مهني", layout="centered")
 
-# فرض اتجاه الكتابة من اليمين إلى اليسار على كامل الصفحة
+# فرض اتجاه الكتابة من اليمين إلى اليسار على كامل الصفحة + لمسات تصميم حيوية
 st.markdown("""
     <style>
     html, body, [class*="css"], .stApp {
@@ -15,6 +15,45 @@ st.markdown("""
     .stMarkdown, .stCaption, .stTextArea textarea, label, .stSlider {
         text-align: right;
         direction: rtl;
+    }
+    .survey-header {
+        background: linear-gradient(135deg, #0F766E 0%, #14B8A6 100%);
+        padding: 28px 24px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 14px rgba(15, 118, 110, 0.25);
+    }
+    .survey-header h1 {
+        color: white !important;
+        font-size: 26px;
+        margin: 0;
+        text-align: center;
+    }
+    .survey-header p {
+        color: #E6FFFA;
+        text-align: center;
+        margin-top: 8px;
+        font-size: 15px;
+    }
+    .form-card {
+        background-color: #F8FAFC;
+        border-radius: 12px;
+        padding: 20px 24px;
+        border: 1px solid #E2E8F0;
+        margin-bottom: 12px;
+    }
+    div[data-testid="stForm"] {
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 24px;
+        background-color: #FAFFFE;
+    }
+    .stButton>button, .stFormSubmitButton>button {
+        background-color: #0F766E;
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 10px 22px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -25,7 +64,12 @@ st.markdown("""
 respondent_token = st.query_params.get("token")
 
 if not respondent_token:
-    st.title("استطلاع رأي حول الأداء والتعامل المهني (زميلكم طارق البلاسمة)")
+    st.markdown("""
+        <div class="survey-header">
+            <h1>📋 استطلاع رأي حول الأداء والتعامل المهني</h1>
+            <p>زميلكم طارق البلاسمة</p>
+        </div>
+    """, unsafe_allow_html=True)
     st.write("اضغط الرابط أدناه للمتابعة إلى الاستبيان:")
     new_token = str(uuid.uuid4())
     st.link_button("ابدأ الاستبيان ←", f"?token={new_token}")
@@ -34,14 +78,19 @@ if not respondent_token:
 if "submitted" not in st.session_state:
     st.session_state.submitted = False
 
-st.title("استطلاع رأي حول الأداء والتعامل المهني (زميلكم طارق البلاسمة)")
+st.markdown("""
+    <div class="survey-header">
+        <h1>📋 استطلاع رأي حول الأداء والتعامل المهني</h1>
+        <p>زميلكم طارق البلاسمة</p>
+    </div>
+""", unsafe_allow_html=True)
 
 if st.session_state.submitted:
     st.success("✅ شكراً لك! تم استلام تقييمك بنجاح.")
     st.stop()
 
 # ضع الرابط الخاص بك هنا (تأكد أنه بين علامتي التنصيص "")
-script_url = "https://script.google.com/macros/s/AKfycbxT4UXKVfbe0P3XyzD--0l49b9GdnMwzNm9depvX3xTTx-_90bC13kGdaC0Z_31sHg9/exec"
+script_url = "https://script.google.com/macros/s/AKfycbxLsDcgEpWtw0sPNTsLdjILT099ElJzeEoyP6PvANFnbVJtLiDBlrnz-6EFbKShpAuB/exec"
 
 # سؤال السكربت مسبقاً: هل هذا الرمز قدّم الاستبيان من قبل؟
 if "already_submitted" not in st.session_state:
@@ -58,25 +107,43 @@ if st.session_state.already_submitted:
 
 # --- واجهة الاستبيان ---
 st.markdown("""
-عزيزي الزميل/ة، هذا الاستطلاع **مجهول بالكامل بالنسبة لي**؛ لا أستطيع ولا أرغب
+<div class="form-card">
+عزيزي الزميل/ة، هذا الاستطلاع <b>مجهول بالكامل بالنسبة لي</b>؛ لا أستطيع ولا أرغب
 بمعرفة هويتك أو ربط إجابتك باسمك. الرابط الذي فتحته يحمل رمزاً عشوائياً (لا يحمل
-أي معلومة عنك) هدفه الوحيد منع تكرار التعبئة أكثر من مرة. هدف الاستبيان تحسين الأداء والتعامل المهني.
-<hr>
+أي معلومة عنك) هدفه الوحيد منع تكرار التعبئة أكثر من مرة. هدف الاستبيان تحسين الأداء والتعامل المهني. 🌟
+</div>
 """, unsafe_allow_html=True)
 
-with st.form(key="survey_form"):
-    st.caption("مقياس التقييم: 1 = ضعيف  ←  →  5 = قوي")
-    work_style = st.select_slider("1. أسلوبي العام في العمل وتنسيق المهام:", options=[1, 2, 3, 4, 5], value=3)
-    efficiency = st.select_slider("2. كفاءتي المهنية وقدرتي على إنجاز العمل:", options=[1, 2, 3, 4, 5], value=3)
-    interaction = st.select_slider("3. المعاملة الشخصية والتواصل الإنساني معكم:", options=[1, 2, 3, 4, 5], value=3)
-    leadership = st.select_slider("4. قدرتي على القيادة واتخاذ القرار:", options=[1, 2, 3, 4, 5], value=3)
-    communication = st.select_slider("5. وضوح تواصلي وتعليماتي بخصوص المهام:", options=[1, 2, 3, 4, 5], value=3)
-    fairness = st.select_slider("6. عدالتي وموضوعيتي بالتعامل مع أعضاء الفريق:", options=[1, 2, 3, 4, 5], value=3)
-    openness = st.select_slider("7. انفتاحي على أفكاركم ونقدكم البنّاء:", options=[1, 2, 3, 4, 5], value=3)
-    talent_dev = st.select_slider("8. دعمي لتطوير مهاراتكم ومواهبكم:", options=[1, 2, 3, 4, 5], value=3)
-    notes = st.text_area("ملاحظات إضافية (اختياري):")
+# مقياس تقييم وصفي بتدرّج (نفس القيم الرقمية 1-5 من الخلف، لكن بعرض وصفي أوضح)
+SCALE_LABELS = {
+    1: "1 – ضعيف 🔴",
+    2: "2 – دون المتوسط 🟠",
+    3: "3 – متوسط 🟡",
+    4: "4 – جيد 🟢",
+    5: "5 – ممتاز 💚",
+}
 
-    submit_button = st.form_submit_button(label="إرسال التقييم")
+with st.form(key="survey_form"):
+    st.caption("مقياس التقييم يتدرّج من الأحمر (ضعيف) إلى الأخضر (ممتاز)")
+    work_style = st.select_slider("🗂️ 1. أسلوبي العام في العمل وتنسيق المهام:",
+                                   options=[1, 2, 3, 4, 5], value=3, format_func=lambda x: SCALE_LABELS[x])
+    efficiency = st.select_slider("⚡ 2. كفاءتي المهنية وقدرتي على إنجاز العمل:",
+                                   options=[1, 2, 3, 4, 5], value=3, format_func=lambda x: SCALE_LABELS[x])
+    interaction = st.select_slider("🤝 3. المعاملة الشخصية والتواصل الإنساني معكم:",
+                                    options=[1, 2, 3, 4, 5], value=3, format_func=lambda x: SCALE_LABELS[x])
+    leadership = st.select_slider("🎯 4. قدرتي على القيادة واتخاذ القرار:",
+                                   options=[1, 2, 3, 4, 5], value=3, format_func=lambda x: SCALE_LABELS[x])
+    communication = st.select_slider("💬 5. وضوح تواصلي وتعليماتي بخصوص المهام:",
+                                      options=[1, 2, 3, 4, 5], value=3, format_func=lambda x: SCALE_LABELS[x])
+    fairness = st.select_slider("⚖️ 6. عدالتي وموضوعيتي بالتعامل مع أعضاء الفريق:",
+                                 options=[1, 2, 3, 4, 5], value=3, format_func=lambda x: SCALE_LABELS[x])
+    openness = st.select_slider("💡 7. انفتاحي على أفكاركم ونقدكم البنّاء:",
+                                 options=[1, 2, 3, 4, 5], value=3, format_func=lambda x: SCALE_LABELS[x])
+    talent_dev = st.select_slider("🌱 8. دعمي لتطوير مهاراتكم ومواهبكم:",
+                                   options=[1, 2, 3, 4, 5], value=3, format_func=lambda x: SCALE_LABELS[x])
+    notes = st.text_area("📝 ملاحظات إضافية (اختياري):")
+
+    submit_button = st.form_submit_button(label="إرسال التقييم 🚀")
 
 if submit_button:
     payload = {
