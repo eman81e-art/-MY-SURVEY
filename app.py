@@ -1,7 +1,7 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import requests
 import json
+import uuid
 
 # إعداد الصفحة
 st.set_page_config(page_title="استطلاع رأي مهني", layout="centered")
@@ -19,52 +19,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- الحصول على رمز عشوائي عبر كوكيز المتصفح مباشرة (بدون مكوّن خارجي معقّد) ---
-# هذه الطريقة تعتمد فقط على جافاسكربت + كوكيز عادية + إعادة توجيه بسيطة،
-# وهي متوافقة مع متصفحات التطبيقات المدمجة (واتساب/إنستغرام) بعكس المكوّنات
-# ثنائية الاتجاه المعقّدة التي قد لا تُحمَّل بشكل صحيح داخل تلك المتصفحات.
+# --- الحصول على رمز عشوائي لمنع التكرار، عبر رابط Streamlit أصلي (بدون أي إطار أو جافاسكربت) ---
+# هذا الرابط جزء طبيعي من صفحة التطبيق نفسها (وليس داخل iframe)، لذلك يعمل
+# بنفس الطريقة تماماً على كل المتصفحات والأجهزة بدون استثناء.
 respondent_token = st.query_params.get("token")
 
 if not respondent_token:
     st.title("استطلاع رأي حول الأداء والتعامل المهني (زميلكم طارق البلاسمة)")
     st.write("اضغط الرابط أدناه للمتابعة إلى الاستبيان:")
-    components.html("""
-        <div style="text-align:center; padding:10px;">
-          <a id="startLink" href="#" target="_top" style="display:inline-block; padding:14px 32px;
-             font-size:16px; text-decoration:none; background-color:#2563eb; color:white;
-             border-radius:8px; font-family:sans-serif;">
-            ابدأ الاستبيان ←
-          </a>
-        </div>
-        <script>
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-            return null;
-        }
-        let token = getCookie('survey_token');
-        if (!token) {
-            token = crypto.randomUUID ? crypto.randomUUID() :
-                'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                    const r = Math.random() * 16 | 0;
-                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-                });
-            document.cookie = "survey_token=" + token + ";max-age=31536000;path=/";
-        }
-        try {
-            const url = new URL(window.top.location.href);
-            url.searchParams.set('token', token);
-            document.getElementById('startLink').href = url.toString();
-        } catch (e) {
-            // في حال تعذّر الوصول لرابط الصفحة الأب لأي سبب، نستخدم رابط الإطار الحالي كبديل
-            const fallbackUrl = new URL(window.location.href);
-            fallbackUrl.searchParams.set('token', token);
-            document.getElementById('startLink').href = fallbackUrl.toString();
-        }
-        </script>
-    """, height=90)
+    new_token = str(uuid.uuid4())
+    st.link_button("ابدأ الاستبيان ←", f"?token={new_token}")
     st.stop()
 
 if "submitted" not in st.session_state:
@@ -77,7 +41,7 @@ if st.session_state.submitted:
     st.stop()
 
 # ضع الرابط الخاص بك هنا (تأكد أنه بين علامتي التنصيص "")
-script_url = "https://script.google.com/macros/s/AKfycbxT4UXKVfbe0P3XyzD--0l49b9GdnMwzNm9depvX3xTTx-_90bC13kGdaC0Z_31sHg9/exec"
+script_url = "https://script.google.com/macros/s/AKfycbxLsDcgEpWtw0sPNTsLdjILT099ElJzeEoyP6PvANFnbVJtLiDBlrnz-6EFbKShpAuB/exec"
 
 # سؤال السكربت مسبقاً: هل هذا الرمز قدّم الاستبيان من قبل؟
 if "already_submitted" not in st.session_state:
@@ -95,8 +59,8 @@ if st.session_state.already_submitted:
 # --- واجهة الاستبيان ---
 st.markdown("""
 عزيزي الزميل/ة، هذا الاستطلاع **مجهول بالكامل بالنسبة لي**؛ لا أستطيع ولا أرغب
-بمعرفة هويتك أو ربط إجابتك باسمك. يُخزَّن في متصفحك رمز عشوائي (لا يحمل أي معلومة
-عنك) هدفه الوحيد منع تكرار التعبئة أكثر من مرة. هدف الاستبيان تحسين الأداء والتعامل المهني.
+بمعرفة هويتك أو ربط إجابتك باسمك. الرابط الذي فتحته يحمل رمزاً عشوائياً (لا يحمل
+أي معلومة عنك) هدفه الوحيد منع تكرار التعبئة أكثر من مرة. هدف الاستبيان تحسين الأداء والتعامل المهني.
 <hr>
 """, unsafe_allow_html=True)
 
